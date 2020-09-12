@@ -1,0 +1,61 @@
+﻿chunk : block;
+block : stats? retstat?;
+stats : stats? stat;
+stat :  ";" | 
+	varlist SP? "=" SP? explist | 
+	functioncall | 
+	label | 
+	"break" | 
+	"goto" SP? Name | 
+	"do" SP? block SP? "end" | 
+	"while" SP? exp SP? "do" SP? block SP? "end" | 
+	"repeat" SP? block SP? "until" SP? exp | 
+	"if" SP? exp SP? "then" block elseifparts? else_block? "end" | 
+	"for" SP? Name SP? "=" SP? exp SP? "," SP? exp comma_exp? "do" block "end" | 
+	"for" SP? namelist SP? "in" SP? explist SP? "do" SP? block SP? "end" | 
+	"function" SP? funcname SP? funcbody | 
+	"local" SP? "function" SP? Name SP? funcbody | 
+	"local" attnamelist eq_optlist? 
+
+comma_exp : "," SP? exp;	
+elseifparts:elseifpart|elseifparts elseifpart;
+elseifpart: "elseif" SP? exp SP? "then" block ;
+else_block: "else" SP? block;
+eq_optlist: "=" explist;
+
+attnamelist : Name attrib? | attnamelist ","? Name attrib?;
+attrib : "<" SP? Name SP? ">";
+retstat : "return" explist? ";"?
+label : "::" SP? Name SP? "::";
+funcname : Name| funcname SP? "." SP? Name SP? post_name? ;
+post_name : ":" SP? Name;
+varlist : var | varlist SP? "," var;
+var :  Name | prefixexp SP? "[" SP? exp SP? "]" | prefixexp SP? "." SP? Name;
+namelist: Name | namelist SP? "," SP? Name;
+explist : exp | explist SP? "," SP? exp;
+exp :  "nil" | "false" | "true" | Numeral | LiteralString | "..." | functiondef | 
+		prefixexp | tableconstructor | exp SP? binop SP? exp | unop SP? exp ;
+prefixexp := var | functioncall | "(" SP? exp SP? ")";
+functioncall :  prefixexp SP? args | prefixexp SP? ":" SP? Name SP? args ;
+args :  "("SP? explist? SP?")" | tableconstructor | LiteralString ;
+functiondef : "function" SP? funcbody ;
+funcbody : "(" SP? parlist? SP? ")" SP? block SP? "end"
+parlist : namelist SP? comma-dots | dots
+comma-dots : "," SP? dots;
+dots: "...";
+tableconstructor : "{" SP? fieldlist? SP? "}";
+fieldlist : field
+	      | fieldlist SP? fieldsep SP? field SP? fieldsep?
+		  ;
+field : "[" SP? exp SP? "]" SP? "=" SP? exp | Name SP? "=" SP? exp | exp ;
+fieldsep : "," | ";";
+binop :  "+" | "-" | "*" | "/" | "//" | "^" | "%" | 
+		"&" | "~" | "|" | ">>" | "<<" | ".." | 
+		"<" | "<=" | ">" | ">=" | "==" | "~=" | 
+		"and" | "or" ;
+unop : "-" | "not" | "#" | "~";
+
+SP: ;
+Name: ;
+Numeral:;
+LiteralString:;
